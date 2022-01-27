@@ -1,6 +1,8 @@
-import { Box, Text, TextField, Image, Button } from '@skynexui/components';
+import { Box, Text, TextField, Image, Button, Icon } from '@skynexui/components';
 import React from 'react';
 import appConfig from '../config.json';
+
+
 
 
 export default function ChatPage() {
@@ -10,9 +12,9 @@ export default function ChatPage() {
   //dicionar o texto em uma Lista li
 
   /* Dev */
-  //[] Campo Criado
-  //[] Vamos usar onChange usar useState (ter um 'if' para caso enter for precionado limpar a variavel )
-  //[] Lista de mensagens
+  //[X] Campo Criado
+  //[X] Vamos usar onChange usar useState (ter um 'if' para caso enter for precionado limpar a variavel )
+  //[x] Lista de mensagens
 
   const [mensagem, setMensagem] = React.useState('');
   const [listaMensagem, setListaMensagem] = React.useState([]);
@@ -20,16 +22,17 @@ export default function ChatPage() {
   function handleNovaMensagem(novaMensagem) {
     const mensagem = {
       id: listaMensagem.length + 2,
-      de: 'Vanessa',
+      de: 'Lancelotti-beta',
       texto: novaMensagem,
     }
     setListaMensagem([
-      novaMensagem,
+      mensagem,
       ...listaMensagem,
     ])
     setMensagem('');
   }
 
+  
 
   return (
     <Box
@@ -108,6 +111,7 @@ export default function ChatPage() {
               type="textarea"
               styleSheet={{
                 width: '100%',
+                height: '100%',
                 border: '0',
                 resize: 'none',
                 borderRadius: '5px',
@@ -115,6 +119,33 @@ export default function ChatPage() {
                 backgroundColor: appConfig.theme.colors.neutrals[800],
                 marginRight: '12px',
                 color: appConfig.theme.colors.neutrals[200],
+              }}
+            />
+
+
+            <Button
+
+              value = {mensagem}
+              onClick={(event) => {
+                event.preventDefault();
+                handleNovaMensagem(mensagem);
+              }}
+            
+              colorVariant="dark"
+              fullWidth
+              iconName="arrowRight"
+              size="lg"
+              variant='primary'
+              styleSheet={{
+                padding: '6px 8px',
+                marginRight: '12px',
+              }}
+              buttonColors={{
+                contrastColor: appConfig.theme.colors.neutrals["000"],
+                mainColor: appConfig.theme.colors.neutrals[500],
+                mainColorLight: appConfig.theme.colors.primary[400],
+                mainColorStrong: appConfig.theme.colors.primary[600],
+                
               }}
             />
           </Box>
@@ -185,7 +216,7 @@ function MessageList(props) {
                   display: 'inline-block',
                   marginRight: '8px',
                 }}
-                src={`https://github.com/Lancelotti-beta.png`}
+                src={`https://github.com/${mensagem.de}.png`}
               />
               <Text tag="strong">
               {mensagem.de}
