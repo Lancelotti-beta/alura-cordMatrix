@@ -1,34 +1,68 @@
 import { Box, Text, TextField, Image, Button, Icon } from '@skynexui/components';
 import React from 'react';
 import appConfig from '../config.json';
+import { createClient } from '@supabase/supabase-js';
 
+
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTY0MzMyMjQ5MCwiZXhwIjoxOTU4ODk4NDkwfQ.EPhlDwI14J03pEM6ZbhItdjzlPAYRQvfP7J3VEY70X4';
+const SUPABASE_URL = 'https://hsaimhnbmvhbeqnedfpv.supabase.co';
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 
 
 export default function ChatPage() {
+
   /* User */
   //Digitar no Campo TextArea
   //aperta enter para enviar
   //dicionar o texto em uma Lista li
+  //User ver a mensagem com suas info de conta
+  //User clica no botão para enviar mensagem 
+  //Useer pode apagar mensagens já enviadas 
 
   /* Dev */
   //[X] Campo Criado
   //[X] Vamos usar onChange usar useState (ter um 'if' para caso enter for precionado limpar a variavel )
   //[x] Lista de mensagens
-
+  //[X] desenvolver um botão de enviar com 'clic'
+  //[] desenvolver uma função para apagar mensagem 
+  //[] criar um "mine sever" /* ach que é isso mesmo */
+ 
   const [mensagem, setMensagem] = React.useState('');
   const [listaMensagem, setListaMensagem] = React.useState([]);
 
+  React.useEffect(() => {
+    supabaseClient
+      .from('mensagens')
+      .select('*')
+      .order('id', {ascending: false})
+      .then(({data}) => {
+        console.log('dados do sever: ', data);
+        setListaMensagem(data);
+      });
+
+  }, []);
+
   function handleNovaMensagem(novaMensagem) {
     const mensagem = {
-      id: listaMensagem.length + 2,
+      // id: listaMensagem.length + 1,
       de: 'Lancelotti-beta',
       texto: novaMensagem,
     }
-    setListaMensagem([
-      mensagem,
-      ...listaMensagem,
-    ])
+
+    supabaseClient
+      .from('mensagens')
+      .insert([
+        mensagem
+      ])
+      .then(({ data }) => {
+        setListaMensagem([
+          data[0],
+          ...listaMensagem,
+        ])
+
+      })
+
     setMensagem('');
   }
 
