@@ -47,8 +47,8 @@ export function SendSticker(props) {
             position: 'absolute',
             backgroundColor: appConfig.theme.colors.neutrals[600],
             width: {
-              xs: '200px',
-              sm: '290px',
+              xs: '150px',
+              sm: '200px',
             },
             height: '300px',
             right: '30px',

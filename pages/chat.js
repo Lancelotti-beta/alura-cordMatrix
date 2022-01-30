@@ -13,8 +13,8 @@ const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 function messageRealTime(addMessage){
   return supabaseClient
     .from('mensagens')
-    .on('INSERT', ({ respostaLive }) => {
-      addMessage(respostaLive.new)
+    .on('INSERT', ( respostaLive ) => {
+      addMessage(respostaLive.new);
     })
     .subscribe();
 }
@@ -58,16 +58,31 @@ export default function ChatPage() {
         // console.log('dados do sever: ', data);
         setListaMensagem(data);
       });
+ 
 
-    messageRealTime((novaMensagem) => {
-      // handleNovaMensagem(novaMensagem)
-      setListaMensagem((listaValorAtual) => {
-        return [
-          novaMensagem,
-          ...listaValorAtual,
-        ]
+      const subcription = messageRealTime((novaMensagem) => {
+        console.log('Nova Mensagem ', novaMensagem);
+        console.log('Lista de Mensagens ', listaMensagem);
+        //Quero um  valor de referencia (Array || Object)
+        //Passar uma função para o setState 
+        
+        // setListaMensagem([
+        //   novaMensagem,
+        //   ...listaMensagem
+        // ])
+
+        setListaMensagem((listaValorAtual) => {
+          console.log(`Valor atual da lista ${listaValorAtual}`);
+          return [
+            novaMensagem,
+            ...listaValorAtual,
+          ]
+        });
       });
-    });
+
+      return () => {
+        subcription.unsubscribe();
+      }
   }, []);
 
   function handleNovaMensagem(novaMensagem) {
@@ -80,6 +95,7 @@ export default function ChatPage() {
     supabaseClient
       .from('mensagens')
       .insert([
+        //Obejeto com os campos que foi escrito no SupaBase 
         mensagem
       ])
       .then(({ data }) => {
@@ -288,7 +304,7 @@ function MessageList(props) {
                 styleSheet={{
                   width: '20px',
                   height: '20px',
-                  borderRadius: '50%',
+                  borderRadius: '15%',
                   display: 'inline-block',
                   marginRight: '8px',
                 }}
@@ -311,7 +327,16 @@ function MessageList(props) {
             {/* Condicional: {mensagem.texto.startsWith(':Sticker:').toString()} */}
             {mensagem.texto.startsWith('_:Sticker:_') 
             ? (
-              <Image src={mensagem.texto.replace('_:Sticker:_', '')} />
+
+              <Image src={mensagem.texto.replace('_:Sticker:_', '')} 
+                styleSheet={{
+                  width: '225px',
+                  height: '225px',
+                  borderRadius: '15%',
+                  display: 'inline-block',
+                  margin: '0 40px 0',
+                }}
+              />
             )
             : (
               mensagem.texto
