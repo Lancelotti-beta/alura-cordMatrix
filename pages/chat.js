@@ -1,16 +1,28 @@
 import { Box, Text, TextField, Image, Button, Icon } from '@skynexui/components';
 import React from 'react';
 import appConfig from '../config.json';
+import { useRouter } from 'next/router';
 import { createClient } from '@supabase/supabase-js';
+import { SendSticker } from  '../src/componentes/SendSticker';
 
 
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTY0MzMyMjQ5MCwiZXhwIjoxOTU4ODk4NDkwfQ.EPhlDwI14J03pEM6ZbhItdjzlPAYRQvfP7J3VEY70X4';
 const SUPABASE_URL = 'https://hsaimhnbmvhbeqnedfpv.supabase.co';
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-
+function messageRealTime(addMessage){
+  return supabaseClient
+    .from('mensagens')
+    .on('INSERT', ({ respostaLive }) => {
+      addMessage(respostaLive.new)
+    })
+    .subscribe();
+}
 
 export default function ChatPage() {
+  const roteamento = useRouter();
+  const userOn = roteamento.query.username;
+
 
   /* User */
   //Digitar no Campo TextArea
@@ -18,7 +30,9 @@ export default function ChatPage() {
   //dicionar o texto em uma Lista li
   //User ver a mensagem com suas info de conta
   //User clica no botão para enviar mensagem 
-  //Useer pode apagar mensagens já enviadas 
+  //User usa sticker 
+  //User recebe mensagem em tempo real
+  //User pode apagar mensagens já enviadas
 
   /* Dev */
   //[X] Campo Criado
@@ -26,7 +40,11 @@ export default function ChatPage() {
   //[x] Lista de mensagens
   //[X] desenvolver um botão de enviar com 'clic'
   //[] desenvolver uma função para apagar mensagem 
-  //[] criar um "mine sever" /* ach que é isso mesmo */
+  //[x] Sticker funcionando
+  //[] Atualizar o back-end para receber as mensagem em real time
+  //[X] criar um "mine sever" /* acho que é isso mesmo */
+
+
  
   const [mensagem, setMensagem] = React.useState('');
   const [listaMensagem, setListaMensagem] = React.useState([]);
@@ -37,16 +55,25 @@ export default function ChatPage() {
       .select('*')
       .order('id', {ascending: false})
       .then(({data}) => {
-        console.log('dados do sever: ', data);
+        // console.log('dados do sever: ', data);
         setListaMensagem(data);
       });
 
+    messageRealTime((novaMensagem) => {
+      // handleNovaMensagem(novaMensagem)
+      setListaMensagem((listaValorAtual) => {
+        return [
+          novaMensagem,
+          ...listaValorAtual,
+        ]
+      });
+    });
   }, []);
 
   function handleNovaMensagem(novaMensagem) {
     const mensagem = {
       // id: listaMensagem.length + 1,
-      de: 'Lancelotti-beta',
+      de: userOn,
       texto: novaMensagem,
     }
 
@@ -56,11 +83,7 @@ export default function ChatPage() {
         mensagem
       ])
       .then(({ data }) => {
-        setListaMensagem([
-          data[0],
-          ...listaMensagem,
-        ])
-
+        console.log(`O que esta recebendo? ${data}`);
       })
 
     setMensagem('');
@@ -120,11 +143,16 @@ export default function ChatPage() {
           <Box
             as="form"
             styleSheet={{
+              width: '100%', marginBottom: '10px',
               display: 'flex',
               alignItems: 'center',
+              justifyContent: 'space-between',
             }}
+
           >
+            
             <TextField
+
 
               value = { mensagem }
               onChange = {(event) => {
@@ -134,17 +162,15 @@ export default function ChatPage() {
 
               onKeyPress = {(event) => {
                 if (event.key === 'Enter') {
-
                   event.preventDefault();
                   handleNovaMensagem(mensagem);
-
                 }
               }}
 
               placeholder="Insira sua mensagem aqui..."
               type="textarea"
               styleSheet={{
-                width: '100%',
+                width: '70%',
                 height: '100%',
                 border: '0',
                 resize: 'none',
@@ -156,6 +182,13 @@ export default function ChatPage() {
               }}
             />
 
+            {/* CallBack */}
+            <SendSticker 
+              onStickerClick={(sticker) => {
+                //console.log('[USANDO O COMPONENTE] clicou no sticker ' + sticker);
+                handleNovaMensagem(`_:Sticker:_${sticker}`);
+              }}
+            />
 
             <Button
 
@@ -171,12 +204,21 @@ export default function ChatPage() {
               size="lg"
               variant='primary'
               styleSheet={{
-                padding: '6px 8px',
-                marginRight: '12px',
+                borderRadius: '50%',
+                padding: '0 3px 0 0',
+                minWidth: '50px',
+                minHeight: '50px',
+                fontSize: '20px',
+                marginBottom: '8px',
+                lineHeight: '0',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
               }}
+
               buttonColors={{
                 contrastColor: appConfig.theme.colors.neutrals["000"],
-                mainColor: appConfig.theme.colors.neutrals[500],
+                mainColor: appConfig.theme.colors.neutrals[600],
                 mainColorLight: appConfig.theme.colors.primary[400],
                 mainColorStrong: appConfig.theme.colors.primary[600],
                 
@@ -266,7 +308,16 @@ function MessageList(props) {
                 {(new Date().toLocaleDateString())}
               </Text>
             </Box>
-            {mensagem.texto}
+            {/* Condicional: {mensagem.texto.startsWith(':Sticker:').toString()} */}
+            {mensagem.texto.startsWith('_:Sticker:_') 
+            ? (
+              <Image src={mensagem.texto.replace('_:Sticker:_', '')} />
+            )
+            : (
+              mensagem.texto
+            )}
+
+            {/* {mensagem.texto} */}
           </Text>
 
         );

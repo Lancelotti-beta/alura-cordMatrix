@@ -25,20 +25,6 @@ function GlobalStyle(){
             }
             /* ./App fit Height */
 
-            /* webkit scroll */
-            ::-webkitscrollbar{
-                width: 0.5em;
-            }
-
-            /* Track */
-            :: -webkit-scrollbar-track{
-                background: #CCCCCC;
-            }
-
-            /* Handle */
-            :: -webkit-scrollbar-thumb{
-                background: #F79596;
-            }
 
         `}</style>
     )
