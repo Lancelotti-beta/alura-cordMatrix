@@ -4,6 +4,7 @@ import appConfig from '../config.json';
 import { useRouter } from 'next/router';
 import { createClient } from '@supabase/supabase-js';
 import { SendSticker } from  '../src/componentes/SendSticker';
+import react from 'react';
 
 
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTY0MzMyMjQ5MCwiZXhwIjoxOTU4ODk4NDkwfQ.EPhlDwI14J03pEM6ZbhItdjzlPAYRQvfP7J3VEY70X4';
@@ -145,7 +146,7 @@ export default function ChatPage() {
           }}
         >
 
-          <MessageList mensagem={listaMensagem} />
+          <MessageList mensagem={listaMensagem} setMensagens={setListaMensagem} />
 
           {/* {listaMensagem.map((mensagemEnviada) => {
             return (
@@ -267,7 +268,20 @@ function Header() {
 
 
 function MessageList(props) {
-  console.log(props);
+  // console.log(props);
+
+
+  react.useEffect(() => {
+
+  }, []);
+
+  function RemoveMessage(message){
+    const newListMessage = props.mensagens.filter((messageRemove) => {
+      return message.id !== messageRemove.id
+    })
+    props.setMensagens(newListMessage);
+  }
+
   return (
     <Box
       tag="ul"
@@ -298,6 +312,7 @@ function MessageList(props) {
             <Box
               styleSheet={{
                 marginBottom: '8px',
+                display: 'flex',
               }}
             >
               <Image
@@ -317,12 +332,43 @@ function MessageList(props) {
                 styleSheet={{
                   fontSize: '10px',
                   marginLeft: '8px',
+                  display: 'inline-block',
                   color: appConfig.theme.colors.neutrals[300],
                 }}
                 tag="span"
               >
                 {(new Date().toLocaleDateString())}
+                <Button
+                  onClick={(event) => {
+                    event.preventDefault();
+                    RemoveMessage(mensagem);
+                  }}
+
+                  colorVariant="dark"
+                  label="X"
+                  styleSheet={{
+                    borderRadius: '50%',
+                    padding: '0 3px 0 0',
+                    minWidth: '20px',
+                    minHeight: '20px',
+                    fontSize: '20px',
+                    marginBottom: '8px',
+                    lineHeight: '0',
+                    display: 'inline-block',
+                    justifyContent: 'space-between',
+                  }}
+    
+                  buttonColors={{
+                    contrastColor: appConfig.theme.colors.neutrals["000"],
+                    mainColor: appConfig.theme.colors.neutrals[600],
+                    mainColorLight: appConfig.theme.colors.primary[400],
+                    mainColorStrong: appConfig.theme.colors.primary[600],
+ 
+                  }}
+                />
               </Text>
+
+
             </Box>
             {/* Condicional: {mensagem.texto.startsWith(':Sticker:').toString()} */}
             {mensagem.texto.startsWith('_:Sticker:_') 
